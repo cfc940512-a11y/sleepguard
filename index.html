@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>防睡</title>
+<meta name="theme-color" content="#14213D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="防睡">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root {
+  --bg: #F2F4F8;
+  --card: #FFFFFF;
+  --ink: #14213D;
+  --sub: #4A5568;
+  --chip: #E6EAF2;
+  --line: #DDE2EC;
+  --big: #14213D;
+  --bigink: #FFFFFF;
+  --amber: #E8890C;
+  --warnbg: #FFF7ED;
+  --warnink: #7C2D12;
+  --ok: #0F7B6C;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1626;
+    --card: #1A2540;
+    --ink: #EEF1F7;
+    --sub: #B4BED2;
+    --chip: #2B3A5E;
+    --line: #2B3A5E;
+    --big: #2B3A5E;
+    --warnbg: #3A2A12;
+    --warnink: #FBD9AE;
+    --ok: #4FD1B8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1626;
+  --card: #1A2540;
+  --ink: #EEF1F7;
+  --sub: #B4BED2;
+  --chip: #2B3A5E;
+  --line: #2B3A5E;
+  --big: #2B3A5E;
+  --warnbg: #3A2A12;
+  --warnink: #FBD9AE;
+  --ok: #4FD1B8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input { font-family: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.screen {
+  min-height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: calc(env(safe-area-inset-top, 0px) + 40px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px) 24px;
+}
+.date { font-size: 13px; color: var(--sub); }
+h1 { margin: 4px 0 0 0; font-size: 28px; font-weight: 700; }
+
+/* home */
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; min-height: 280px; }
+.big {
+  width: 220px; height: 220px; border-radius: 50%; border: 0;
+  background: var(--big); color: var(--bigink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font-size: 26px; font-weight: 700;
+  transition: transform .12s ease;
+}
+.big:active { transform: scale(0.97); }
+.big.on { box-shadow: 0 0 0 8px rgba(232,137,12,.35); }
+.status { font-size: 15px; color: var(--sub); text-align: center; min-height: 22px; font-variant-numeric: tabular-nums; }
+.hint { font-size: 12px; color: var(--sub); text-align: center; line-height: 1.5; max-width: 300px; }
+.card { background: var(--card); border-radius: 18px; padding: 16px 18px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row .lbl { font-size: 15px; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 12px; }
+.step button {
+  width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--chip);
+  font-size: 22px; font-weight: 700; line-height: 1;
+}
+.step output { font-size: 20px; font-weight: 700; min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.btns { display: flex; flex-direction: column; gap: 10px; }
+.btn {
+  min-height: 52px; border-radius: 14px; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; padding: 0 16px;
+  text-align: center;
+}
+.btn.line { border: 2px solid var(--ink); background: transparent; }
+.btn.card { border: 0; background: var(--card); }
+
+/* wake */
+#wake { background: #14213D; color: #FFFFFF; --sub: #C7D0E0; }
+.wakehead { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.wakehead h1 { margin: 0; font-size: 26px; }
+.wakecard { background: #FFFFFF; color: #14213D; border-radius: 20px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.wakecard .tag { font-size: 13px; color: #4A5568; }
+.wakecard .word { font-size: 40px; font-weight: 700; word-break: break-word; }
+.wakecard .zh { font-size: 18px; color: #4A5568; }
+.typed {
+  width: 100%; margin-top: 10px; min-height: 56px; border-radius: 12px;
+  border: 2px solid #14213D; background: #F2F4F8; color: #14213D;
+  font-size: 24px; text-align: center; padding: 0 12px;
+}
+.typed.good { border-color: #0F7B6C; background: #E3F4F0; }
+.q { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 44px; padding: 0 18px; border-radius: 22px;
+  border: 2px solid #5B6B8C; background: transparent; color: #FFFFFF;
+  font-size: 15px; font-weight: 500;
+}
+.chip[aria-pressed="true"] { background: #E8890C; border-color: #E8890C; color: #14213D; font-weight: 700; }
+.confirm {
+  margin-top: auto; min-height: 56px; border-radius: 14px; border: 0;
+  background: #E8890C; color: #14213D; font-size: 18px; font-weight: 700;
+}
+.confirm:disabled { background: #3A4A70; color: #C7D0E0; cursor: not-allowed; }
+.wakefoot { text-align: center; font-size: 13px; color: #C7D0E0; }
+
+/* stats */
+.back { align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 4px; background: none; border: 0; font-size: 15px; font-weight: 500; padding: 0; margin-left: -4px; }
+.tabs { display: flex; gap: 8px; }
+.tab { flex: 1; min-height: 44px; border-radius: 12px; border: 0; background: var(--card); color: var(--sub); font-size: 14px; font-weight: 500; }
+.tab[aria-pressed="true"] { background: var(--big); color: var(--bigink); font-weight: 700; }
+.donutwrap { display: flex; gap: 16px; align-items: center; }
+.donut { position: relative; width: 132px; height: 132px; flex: none; border-radius: 50%; background: var(--chip); }
+.donut .hole { position: absolute; inset: 28px; border-radius: 50%; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.donut .hole b { font-size: 17px; }
+.donut .hole span { font-size: 11px; color: var(--sub); }
+.legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.legend div { display: flex; justify-content: space-between; gap: 8px; }
+.legend .nm { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.legend b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sec h2 { margin: 0 0 12px 0; font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; }
+.sec h2 small { font-size: 12px; font-weight: 400; color: var(--sub); }
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 104px; }
+.bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.bar div { width: 100%; background: #8FA3C9; border-radius: 4px; min-height: 3px; }
+.bar.peak div { background: var(--amber); }
+.bar span { font-size: 11px; color: var(--sub); }
+.tip { margin-top: 12px; font-size: 13px; line-height: 1.5; background: var(--warnbg); color: var(--warnink); border-radius: 10px; padding: 10px 12px; }
+.note { font-size: 12px; color: var(--sub); line-height: 1.5; text-align: center; }
+.empty { font-size: 14px; color: var(--sub); line-height: 1.6; text-align: center; padding: 8px 0; }
+.danger { background: none; border: 0; color: var(--sub); font-size: 13px; text-decoration: underline; min-height: 44px; }
+
+:root { --okbg: #CDEBE5; --okink: #0A4F45; --offbg: #FDE7C8; --offink: #7C2D12; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --okbg: #12423B; --okink: #BFEDE3; --offbg: #3A2A12; --offink: #FBD9AE; }
+}
+:root[data-theme="dark"] { --okbg: #12423B; --okink: #BFEDE3; --offbg: #3A2A12; --offink: #FBD9AE; }
+
+.btn.warn { border: 2px solid #B45309; background: var(--warnbg); color: var(--warnink); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.colhead { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 6px; font-size: 12px; font-weight: 700; color: var(--sub); padding: 0 2px; }
+.plist { display: flex; flex-direction: column; gap: 8px; }
+.prow { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 6px; align-items: stretch; }
+.pcell, .acell { border-radius: 12px; padding: 10px 12px; min-height: 60px; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-size: 13px; }
+.pcell { background: var(--chip); }
+.pcell b, .acell b { font-size: 14px; }
+.pcell span, .acell span { font-size: 12px; color: var(--sub); }
+.acell { border: 2px solid transparent; }
+.acell.none { border-style: dashed; border-color: #8793AB; background: transparent; }
+.acell.ok { background: var(--okbg); color: var(--okink); }
+.acell.ok span { color: var(--okink); }
+.acell.off { background: var(--offbg); color: var(--offink); }
+.acell.off span { color: var(--offink); }
+.pdel { border: 0; background: none; color: var(--sub); font-size: 24px; width: 44px; border-radius: 12px; }
+.pchips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pchip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid var(--sub); background: transparent; color: var(--ink); font-size: 15px; }
+.pchip[aria-pressed="true"] { background: var(--big); border-color: var(--big); color: var(--bigink); font-weight: 700; }
+.times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.times label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--sub); }
+.times input { min-height: 48px; border-radius: 12px; border: 2px solid var(--sub); background: var(--bg); color: var(--ink); font-size: 18px; padding: 0 10px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); background: var(--ink); color: var(--bg); border-radius: 14px; padding: 4px 6px 4px 16px; display: flex; align-items: center; gap: 8px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
+.toast button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: inherit; font-weight: 700; text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .big { transition: none; } }
+</style>
+</head>
+<body>
+
+<main id="home" class="screen" aria-label="首頁">
+  <div>
+    <div class="date" id="today"></div>
+    <h1>防睡</h1>
+  </div>
+
+  <div class="hero">
+    <button class="big" id="bigBtn" type="button">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#E8890C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0"/></svg>
+      <span id="bigLabel">開始防睡</span>
+    </button>
+    <div class="status" id="status" aria-live="polite">目前沒有在防睡</div>
+    <div class="hint" id="hint">開始後請讓這個畫面保持開啟。iPhone 側邊的靜音開關要關掉，才聽得到鈴聲。</div>
+  </div>
+
+  <div class="card row">
+    <span class="lbl">每隔幾分鐘確認一次</span>
+    <div class="step">
+      <button type="button" id="minus" aria-label="減少 5 分鐘">−</button>
+      <output id="interval" aria-live="polite">20</output>
+      <button type="button" id="plus" aria-label="增加 5 分鐘">+</button>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button type="button" class="btn warn" id="napBtn">剛剛不小心睡著了（今天 <span id="sleepyCount" style="margin:0 4px">0</span> 次）</button>
+    <button type="button" class="btn line" id="sleepBtn">我要睡了（停止提醒）</button>
+    <div class="two">
+      <button type="button" class="btn card" id="toPlan">今天規劃</button>
+      <button type="button" class="btn card" id="toStats">今天去哪了</button>
+    </div>
+  </div>
+</main>
+
+<main id="wake" class="screen" aria-label="清醒確認" hidden>
+  <div class="wakehead">
+    <h1>你還醒著嗎？</h1>
+    <div class="date" id="wakeTime" style="color:#C7D0E0"></div>
+  </div>
+
+  <div class="wakecard">
+    <span class="tag">照著輸入這個單字</span>
+    <span class="word" id="word"></span>
+    <span class="zh" id="zh"></span>
+    <label for="typed" style="position:absolute;left:-9999px">輸入單字</label>
+    <input id="typed" class="typed" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+  </div>
+
+  <div>
+    <div class="q">你剛剛在做什麼？</div>
+    <div class="chips" id="chips" role="group" aria-label="你剛剛在做什麼"></div>
+  </div>
+
+  <button type="button" class="confirm" id="confirm" disabled>確認</button>
+  <div class="wakefoot">鈴聲會越來越大聲，輸入完成才會停</div>
+</main>
+
+<main id="stats" class="screen" aria-label="統計" hidden>
+  <div>
+    <button type="button" class="back" id="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>回首頁</button>
+    <h1 id="statsTitle">今天去哪了</h1>
+  </div>
+
+  <div class="tabs" role="group" aria-label="範圍">
+    <button type="button" class="tab" id="tabToday" aria-pressed="true">今天</button>
+    <button type="button" class="tab" id="tab7" aria-pressed="false">近 7 天</button>
+  </div>
+
+  <div id="statsEmpty" class="card empty" hidden>還沒有紀錄。開始防睡後，每次確認都會記一筆。</div>
+
+  <div id="statsBody" style="display:flex;flex-direction:column;gap:16px">
+    <div class="card donutwrap">
+      <div class="donut" id="donut"><div class="hole"><b id="totalH">0</b><span>已追蹤</span></div></div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="card sec">
+      <h2>什麼時候最容易睡著 <small>差點睡著的次數</small></h2>
+      <div class="bars" id="bars"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+  </div>
+
+  <div class="note">每次回答代表那段時間大概都在做這件事，時間是推算的。確認時超過 45 秒才回答，或自己按「不小心睡著了」，都算一次差點睡著。</div>
+  <button type="button" class="danger" id="clear">清除所有紀錄</button>
+</main>
+
+<main id="plan" class="screen" aria-label="今天規劃" hidden>
+  <div>
+    <button type="button" class="back" id="planBack">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>回首頁</button>
+    <h1>今天規劃</h1>
+    <div class="date" id="planDate"></div>
+  </div>
+
+  <div class="colhead"><span>計畫</span><span>實際</span><span></span></div>
+  <div class="plist" id="planList"></div>
+  <div class="card empty" id="planEmpty" hidden>還沒有規劃。從下面新增第一個時段。</div>
+
+  <div class="card">
+    <div class="q" style="color:var(--ink)">新增時段</div>
+    <div class="pchips" id="planChips" role="group" aria-label="活動"></div>
+    <div class="times">
+      <label for="pStart">開始<input type="time" id="pStart" value="09:00"></label>
+      <label for="pEnd">結束<input type="time" id="pEnd" value="12:00"></label>
+    </div>
+    <button type="button" class="btn line" id="planAdd" style="width:100%">加入規劃</button>
+    <div class="note" id="planMsg" role="status" style="margin-top:8px"></div>
+  </div>
+
+  <div class="note">這份規劃每天都一樣。「實際」是根據確認時的回答推算的，「符合」是這段時間裡做計畫中那件事的比例。時段不能跨午夜。</div>
+</main>
+
+<div id="toast" class="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="toastUndo">復原</button></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var KEY = "sleepguard-v1";
+  var ACTIVITIES = ["工作", "滑手機", "吃飯", "休息", "其他"];
+  var COLORS = { "工作": "#3B5BA5", "滑手機": "#E8890C", "吃飯": "#0F7B6C", "休息": "#8FA3C9", "其他": "#9AA3B5", "睡覺": "#7A63B8" };
+  var SLEEPY_SECS = 45;
+
+  var WORDS = [
+    ["accommodate", "容納；提供住宿"], ["adjourn", "休會；延期"], ["allocate", "分配"], ["amend", "修訂"],
+    ["applicant", "申請人"], ["appoint", "任命"], ["attendee", "出席者"], ["authorize", "授權"],
+    ["backlog", "積壓的工作"], ["brochure", "小冊子"], ["budget", "預算"], ["candidate", "候選人"],
+    ["clearance", "清倉；許可"], ["colleague", "同事"], ["commute", "通勤"], ["compensation", "補償；薪酬"],
+    ["compliance", "遵守；合規"], ["consecutive", "連續的"], ["contractor", "承包商"], ["deadline", "截止日期"],
+    ["delegate", "委派；代表"], ["deliberate", "審慎的；故意的"], ["disclose", "揭露"], ["distribute", "分發"],
+    ["downsize", "縮編"], ["eligible", "有資格的"], ["enclose", "隨函附上"], ["endorse", "背書；認可"],
+    ["expire", "到期"], ["facilitate", "促進；使便利"], ["fiscal", "財政的"], ["forecast", "預測"],
+    ["hesitate", "猶豫"], ["implement", "實施"], ["incentive", "獎勵；誘因"], ["inventory", "庫存"],
+    ["invoice", "發票；請款單"], ["itinerary", "行程"], ["launch", "推出"], ["merger", "合併"],
+    ["negotiate", "協商"], ["notify", "通知"], ["obsolete", "過時的"], ["outstanding", "未付的；傑出的"],
+    ["overdue", "逾期的"], ["personnel", "人事；員工"], ["postpone", "延期"], ["prerequisite", "先決條件"],
+    ["procurement", "採購"], ["quota", "配額"], ["reimburse", "報銷；償還"], ["reluctant", "不情願的"],
+    ["renovate", "翻新"], ["revenue", "營收"], ["revise", "修改"], ["shipment", "貨運"],
+    ["subsidiary", "子公司"], ["supervisor", "主管"], ["tentative", "暫定的"], ["turnover", "營業額；離職率"],
+    ["vendor", "供應商"], ["warranty", "保固"], ["withdraw", "提領；撤回"]
+  ];
+
+  var state = { interval: 20, running: false, nextAt: 0, sleepStart: 0, log: [], lastActivity: "工作", lastWord: -1, plan: [] };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        for (var k in state) { if (s[k] !== undefined) state[k] = s[k]; }
+      }
+    } catch (e) { /* storage empty or blocked */ }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------- audio ---------- */
+  var ctx = null;
+  function ensureAudio() {
+    try {
+      if (!ctx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) ctx = new AC();
+      }
+      if (ctx && ctx.state === "suspended") ctx.resume();
+    } catch (e) { /* no audio */ }
+  }
+  function beep(vol, double) {
+    if (!ctx) return;
+    try {
+      if (ctx.state === "suspended") ctx.resume();
+      var t0 = ctx.currentTime;
+      var times = double ? [0, 0.22] : [0];
+      times.forEach(function (off) {
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t0 + off);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.001, vol), t0 + off + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + off + 0.18);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0 + off); o.stop(t0 + off + 0.2);
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- wake lock ---------- */
+  var lock = null;
+  function takeLock() {
+    try {
+      if ("wakeLock" in navigator && state.running && document.visibilityState === "visible") {
+        navigator.wakeLock.request("screen").then(function (l) { lock = l; l.addEventListener("release", function () { lock = null; }); }).catch(function () {});
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function dropLock() {
+    try { if (lock) { lock.release(); lock = null; } } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- views ---------- */
+  function show(name) {
+    ["home", "wake", "stats", "plan"].forEach(function (n) { $(n).hidden = (n !== name); });
+    window.scrollTo(0, 0);
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", name === "wake" ? "#14213D" : (isDark() ? "#0E1626" : "#F2F4F8"));
+  }
+  function isDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function hhmm(ts) { var d = new Date(ts); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function startOfDay(ts) { var d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  function fmtMin(m) {
+    m = Math.round(m);
+    var h = Math.floor(m / 60), r = m % 60;
+    if (h === 0) return r + " 分";
+    return r === 0 ? h + " 時" : h + " 時 " + r + " 分";
+  }
+
+  /* ---------- home ---------- */
+  function renderHome() {
+    $("today").textContent = new Date().toLocaleDateString("zh-TW", { month: "long", day: "numeric", weekday: "short" });
+    $("interval").textContent = state.interval;
+    $("bigBtn").classList.toggle("on", state.running);
+    $("bigLabel").textContent = state.running ? "停止防睡" : "開始防睡";
+    $("bigBtn").setAttribute("aria-pressed", state.running ? "true" : "false");
+    var today0 = startOfDay(Date.now());
+    var n = 0;
+    state.log.forEach(function (e) { if (e.t >= today0 && e.sleepy) n++; });
+    $("sleepyCount").textContent = n;
+    updateStatus();
+  }
+  function updateStatus() {
+    var el = $("status");
+    if (state.running) {
+      var left = Math.max(0, Math.round((state.nextAt - Date.now()) / 1000));
+      el.textContent = "下次確認 " + hhmm(state.nextAt) + "（還有 " + Math.floor(left / 60) + ":" + pad(left % 60) + "）";
+    } else if (state.sleepStart) {
+      el.textContent = "睡覺中，從 " + hhmm(state.sleepStart) + " 開始。睡醒按「開始防睡」。";
+    } else {
+      el.textContent = "目前沒有在防睡";
+    }
+  }
+
+  function endSleep() {
+    if (!state.sleepStart) return;
+    var mins = Math.round((Date.now() - state.sleepStart) / 60000);
+    if (mins >= 1 && mins <= 16 * 60) {
+      state.log.push({ t: Date.now(), a: "睡覺", m: mins, sleepy: false });
+    }
+    state.sleepStart = 0;
+  }
+
+  function startGuard() {
+    ensureAudio();
+    endSleep();
+    state.running = true;
+    state.nextAt = Date.now() + state.interval * 60000;
+    save();
+    takeLock();
+    renderHome();
+  }
+  function stopGuard() {
+    state.running = false;
+    dropLock();
+    save();
+    renderHome();
+  }
+
+  $("bigBtn").addEventListener("click", function () { state.running ? stopGuard() : startGuard(); });
+  $("minus").addEventListener("click", function () { state.interval = Math.max(5, state.interval - 5); save(); renderHome(); });
+  $("plus").addEventListener("click", function () { state.interval = Math.min(60, state.interval + 5); save(); renderHome(); });
+  $("sleepBtn").addEventListener("click", function () {
+    if (state.running) { state.running = false; dropLock(); }
+    if (!state.sleepStart) state.sleepStart = Date.now();
+    save();
+    renderHome();
+  });
+  $("toStats").addEventListener("click", function () { renderStats(); show("stats"); });
+  $("back").addEventListener("click", function () { renderHome(); show("home"); });
+
+  /* ---------- wake check ---------- */
+  var waking = false, dueAt = 0, curWord = null, chosen = "", lastBeep = 0;
+
+  function buildChips() {
+    var box = $("chips");
+    box.textContent = "";
+    ACTIVITIES.forEach(function (a) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = a;
+      b.setAttribute("aria-pressed", a === chosen ? "true" : "false");
+      b.addEventListener("click", function () { chosen = a; buildChips(); checkReady(); });
+      box.appendChild(b);
+    });
+  }
+  function norm(s) { return s.trim().toLowerCase(); }
+  function checkReady() {
+    var ok = curWord && norm($("typed").value) === curWord[0];
+    $("typed").classList.toggle("good", !!ok);
+    $("confirm").disabled = !(ok && chosen);
+  }
+
+  function showWake() {
+    if (waking) return;
+    waking = true;
+    dueAt = state.nextAt;
+    var i;
+    do { i = Math.floor(Math.random() * WORDS.length); } while (i === state.lastWord && WORDS.length > 1);
+    state.lastWord = i;
+    curWord = WORDS[i];
+    chosen = plannedNow() || state.lastActivity || "";
+    $("word").textContent = curWord[0];
+    $("zh").textContent = curWord[1];
+    $("typed").value = "";
+    $("wakeTime").textContent = hhmm(Date.now());
+    buildChips();
+    checkReady();
+    show("wake");
+    lastBeep = 0;
+    try { $("typed").focus(); } catch (e) { /* ignore */ }
+  }
+
+  function wakeTick() {
+    var secs = Math.max(0, (Date.now() - dueAt) / 1000);
+    var vol = Math.min(1, 0.1 + (secs / 90) * 0.9);
+    beep(vol, secs >= 30);
+    try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) { /* ignore */ }
+  }
+
+  function finishWake() {
+    var secs = Math.max(0, (Date.now() - dueAt) / 1000);
+    state.log.push({ t: Date.now(), a: chosen, m: state.interval, sleepy: secs >= SLEEPY_SECS });
+    state.lastActivity = chosen;
+    waking = false;
+    state.nextAt = Date.now() + state.interval * 60000;
+    save();
+    renderHome();
+    show("home");
+  }
+
+  $("typed").addEventListener("input", checkReady);
+  $("typed").addEventListener("keydown", function (e) { if (e.key === "Enter" && !$("confirm").disabled) finishWake(); });
+  $("confirm").addEventListener("click", function () { if (!$("confirm").disabled) finishWake(); });
+
+  /* ---------- stats ---------- */
+  var range = "today";
+
+  function setRange(r) {
+    range = r;
+    $("tabToday").setAttribute("aria-pressed", r === "today" ? "true" : "false");
+    $("tab7").setAttribute("aria-pressed", r === "7" ? "true" : "false");
+    renderStats();
+  }
+  $("tabToday").addEventListener("click", function () { setRange("today"); });
+  $("tab7").addEventListener("click", function () { setRange("7"); });
+
+  $("clear").addEventListener("click", function () {
+    if (window.confirm("確定要清除所有紀錄嗎？清除後無法復原。")) {
+      state.log = [];
+      save();
+      renderStats();
+      renderHome();
+    }
+  });
+
+  function renderStats() {
+    var since = range === "today" ? startOfDay(Date.now()) : startOfDay(Date.now()) - 6 * 86400000;
+    $("statsTitle").textContent = range === "today" ? "今天去哪了" : "近 7 天去哪了";
+    var items = state.log.filter(function (e) { return e.t >= since; });
+
+    $("statsEmpty").hidden = items.length > 0;
+    $("statsBody").hidden = items.length === 0;
+    if (items.length === 0) return;
+
+    var totals = {};
+    var all = 0;
+    items.forEach(function (e) { if (!e.m) return; totals[e.a] = (totals[e.a] || 0) + e.m; all += e.m; });
+    var names = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; });
+
+    var stops = [], acc = 0;
+    names.forEach(function (n) {
+      var deg = totals[n] / all * 360;
+      stops.push((COLORS[n] || "#9AA3B5") + " " + acc + "deg " + (acc + deg) + "deg");
+      acc += deg;
+    });
+    $("donut").style.background = stops.length ? "conic-gradient(" + stops.join(", ") + ")" : "";
+    $("totalH").textContent = fmtMin(all);
+
+    var lg = $("legend");
+    lg.textContent = "";
+    names.forEach(function (n) {
+      var row = document.createElement("div");
+      var nm = document.createElement("span");
+      nm.className = "nm";
+      var sw = document.createElement("i");
+      sw.style.background = COLORS[n] || "#9AA3B5";
+      nm.appendChild(sw);
+      nm.appendChild(document.createTextNode(n));
+      var v = document.createElement("b");
+      v.textContent = fmtMin(totals[n]);
+      row.appendChild(nm); row.appendChild(v);
+      lg.appendChild(row);
+    });
+
+    var counts = {};
+    var total = 0;
+    items.forEach(function (e) {
+      if (e.sleepy) { var h = new Date(e.t).getHours(); counts[h] = (counts[h] || 0) + 1; total++; }
+    });
+    var lo = 9, hi = 18;
+    Object.keys(counts).forEach(function (h) { h = +h; if (h < lo) lo = h; if (h > hi) hi = h; });
+    var max = 0, peak = -1;
+    for (var h2 = lo; h2 <= hi; h2++) { if ((counts[h2] || 0) > max) { max = counts[h2]; peak = h2; } }
+    var bars = $("bars");
+    bars.textContent = "";
+    for (var h3 = lo; h3 <= hi; h3++) {
+      var c = counts[h3] || 0;
+      var b = document.createElement("div");
+      b.className = "bar" + (h3 === peak && max > 0 ? " peak" : "");
+      var col = document.createElement("div");
+      col.style.height = (max ? Math.round(c / max * 72) : 0) + "px";
+      var lab = document.createElement("span");
+      lab.textContent = h3;
+      b.setAttribute("title", h3 + " 點：" + c + " 次");
+      b.appendChild(col); b.appendChild(lab);
+      bars.appendChild(b);
+    }
+    $("tip").textContent = total === 0 ? "還沒有差點睡著的紀錄，繼續保持。" : peak + " 點最容易睡著（共 " + total + " 次）。";
+  }
+
+  /* ---------- toast + nap button ---------- */
+  var toastTimer = null;
+  function toast(msg, onUndo) {
+    var t = $("toast");
+    $("toastMsg").textContent = msg;
+    $("toastUndo").hidden = !onUndo;
+    $("toastUndo").onclick = function () { if (onUndo) onUndo(); t.hidden = true; };
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 6000);
+  }
+  $("napBtn").addEventListener("click", function () {
+    var entry = { t: Date.now(), a: "其他", m: 0, sleepy: true, manual: true };
+    state.log.push(entry);
+    save();
+    renderHome();
+    toast("已記錄 " + hhmm(entry.t) + " 睡著", function () {
+      var i = state.log.indexOf(entry);
+      if (i >= 0) { state.log.splice(i, 1); save(); renderHome(); }
+    });
+  });
+
+  /* ---------- plan ---------- */
+  var planAct = "工作";
+  function toMin(t) { var p = t.split(":"); return (+p[0]) * 60 + (+p[1]); }
+  function plannedNow() {
+    var d = new Date(), cur = d.getHours() * 60 + d.getMinutes();
+    for (var i = 0; i < state.plan.length; i++) {
+      var b = state.plan[i];
+      if (toMin(b.s) <= cur && cur < toMin(b.e)) return b.a;
+    }
+    return "";
+  }
+  function buildPlanChips() {
+    var box = $("planChips");
+    box.textContent = "";
+    ACTIVITIES.forEach(function (a) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "pchip";
+      b.textContent = a;
+      b.setAttribute("aria-pressed", a === planAct ? "true" : "false");
+      b.addEventListener("click", function () { planAct = a; buildPlanChips(); });
+      box.appendChild(b);
+    });
+  }
+  function actualIn(bs, be, d0) {
+    var per = {}, total = 0;
+    state.log.forEach(function (e) {
+      if (!e.m || e.t < d0) return;
+      var s0 = e.t - e.m * 60000;
+      var o = (Math.min(e.t, be) - Math.max(s0, bs)) / 60000;
+      if (o > 0) { per[e.a] = (per[e.a] || 0) + o; total += o; }
+    });
+    return { per: per, total: total };
+  }
+  function renderPlan() {
+    $("planDate").textContent = new Date().toLocaleDateString("zh-TW", { month: "long", day: "numeric", weekday: "short" });
+    buildPlanChips();
+    var list = $("planList");
+    list.textContent = "";
+    var blocks = state.plan.slice().sort(function (a, b) { return toMin(a.s) - toMin(b.s); });
+    $("planEmpty").hidden = blocks.length > 0;
+    var now = Date.now(), d0 = startOfDay(now);
+
+    blocks.forEach(function (b) {
+      var bs = d0 + toMin(b.s) * 60000, be = d0 + toMin(b.e) * 60000;
+      var row = document.createElement("div");
+      row.className = "prow";
+
+      var pc = document.createElement("div");
+      pc.className = "pcell";
+      var pn = document.createElement("b"); pn.textContent = b.a;
+      var pr = document.createElement("span"); pr.textContent = b.s + " – " + b.e;
+      pc.appendChild(pn); pc.appendChild(pr);
+
+      var ac = document.createElement("div");
+      ac.className = "acell none";
+      var l1 = document.createElement("b");
+      var l2 = document.createElement("span");
+      if (now < bs) {
+        l1.textContent = "尚未開始";
+      } else {
+        var res = actualIn(bs, Math.min(be, now), d0);
+        if (res.total === 0) {
+          l1.textContent = now < be ? "進行中" : "沒有紀錄";
+        } else {
+          var dom = Object.keys(res.per).sort(function (x, y) { return res.per[y] - res.per[x]; })[0];
+          var pct = Math.round(((res.per[b.a] || 0) / res.total) * 100);
+          ac.className = "acell " + (pct >= 70 ? "ok" : "off");
+          l1.textContent = dom + " " + fmtMin(res.per[dom]);
+          l2.textContent = (now < be ? "進行中，" : "") + "符合 " + pct + "%";
+        }
+      }
+      ac.appendChild(l1);
+      if (l2.textContent) ac.appendChild(l2);
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "pdel";
+      del.textContent = "×";
+      del.setAttribute("aria-label", "刪除 " + b.a + " " + b.s + " 到 " + b.e);
+      del.addEventListener("click", function () {
+        state.plan = state.plan.filter(function (x) { return x.id !== b.id; });
+        save();
+        renderPlan();
+      });
+
+      row.appendChild(pc); row.appendChild(ac); row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+  $("planAdd").addEventListener("click", function () {
+    var s0 = $("pStart").value, e0 = $("pEnd").value, msg = $("planMsg");
+    if (!s0 || !e0) { msg.textContent = "請填開始和結束時間。"; return; }
+    if (toMin(e0) <= toMin(s0)) { msg.textContent = "結束時間要比開始時間晚。"; return; }
+    state.plan.push({ id: Date.now(), s: s0, e: e0, a: planAct });
+    save();
+    msg.textContent = "已加入 " + planAct + " " + s0 + " – " + e0;
+    renderPlan();
+  });
+  $("toPlan").addEventListener("click", function () { $("planMsg").textContent = ""; renderPlan(); show("plan"); });
+  $("planBack").addEventListener("click", function () { renderHome(); show("home"); });
+
+  /* ---------- main loop ---------- */
+  function loop() {
+    var now = Date.now();
+    if (state.running && !waking && now >= state.nextAt) showWake();
+    if (waking) {
+      if (now - lastBeep >= 1000) { lastBeep = now; wakeTick(); }
+    } else if (!$("home").hidden) {
+      updateStatus();
+    }
+  }
+  setInterval(loop, 500);
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") { takeLock(); loop(); }
+  });
+
+  /* ---------- boot ---------- */
+  load();
+  if (state.running && Date.now() >= state.nextAt) { /* due while away: wake screen opens on first loop tick */ }
+  renderHome();
+  show("home");
+  if (state.running) takeLock();
+
+  try {
+    if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
+  } catch (e) { /* ignore */ }
+})();
+</script>
+</body>
+</html>
